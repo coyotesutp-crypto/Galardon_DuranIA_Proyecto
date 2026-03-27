@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>UGRD - Administración Estatal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            padding: 30px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .navbar-global {
+            background: #1e4b3c;
+            padding: 1rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+        }
+        .logo-img {
+            height: 50px;
+        }
+        .logo-text .main-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+        }
+        .logo-text .sub-title {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 30px;
+            transition: 0.2s;
+        }
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h2 {
+            color: #1e4b3c;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e7ef;
+        }
+        th {
+            background: #e0ede7;
+            color: #1e4b3c;
+        }
+        .btn-editar {
+            background: #d4a017;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .btn-editar:hover {
+            background: #b87e0c;
+        }
+        .badge {
+            background: #c8e6d9;
+            color: #1e4b3c;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        .btn-volver {
+            background: #6c757d;
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            text-decoration: none;
+        }
+        .btn-cerrar {
+            background: #dc3545;
+            margin-left: 15px;
+        }
+        .btn-cerrar:hover {
+            background: #c82333;
+        }
+        .button-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar-global">
+            <div class="nav-container">
+                <a href="Inicioreemo.html" class="nav-logo">
+                    <img src="ugrd.png" alt="Inicio" class="logo-img">
+                    <div class="logo-text">
+                        <span class="main-title">Sistema Reemo</span>
+                        <span class="sub-title">Unión Ganadera de Durango</span>
+                    </div>
+                </a>
+            </div>
+        </nav>
+
+        <div class="card">
+            <h2><i class="fas fa-chart-line"></i> Estadísticas por Municipio</h2>
+            <div id="statsTable">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-users"></i> Gestión de Ventanillas</h2>
+            <div id="ventanillasTable">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando ventanillas...</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="cerrarSesionBtn" class="btn-editar" style="background: #dc3545;"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+            <a href="Inicioreemo.html" class="btn-editar" style="background: #6c757d; text-decoration: none;"><i class="fas fa-home"></i> Volver al inicio</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { obtenerVentanillas, actualizarVentanilla, obtenerEstadisticas } from './admin-api.js';
+
+
+        const adminSession = sessionStorage.getItem('adminActive');
+        if (!adminSession) {
+            window.location.href = 'login-ugrd.html';
+        }
+
+        cargarEstadisticas();
+        cargarVentanillas();
+
+        document.getElementById('cerrarSesionBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('adminActive');
+            window.location.href = 'login-ugrd.html';
+        });
+
+        async function cargarEstadisticas() {
+            try {
+                const stats = await obtenerEstadisticas();
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Municipio</th>
+                                <th>Productores</th>
+                                <th>Total de cabezas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                for (const [municipio, data] of Object.entries(stats)) {
+                    html += `
+                        <tr>
+                            <td><span class="badge">${municipio}</span></td>
+                            <td>${data.total_productores}</td>
+                            <td>${data.total_cabezas}</td>
+                        </tr>
+                    `;
+                }
+                html += `</tbody></table>`;
+                document.getElementById('statsTable').innerHTML = html;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('statsTable').innerHTML = '<p style="color:red;">Error cargando estadísticas</p>';
+            }
+        }
+
+        async function cargarVentanillas() {
+            try {
+                const ventanillas = await obtenerVentanillas();
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Municipio</th>
+                                <th>Usuario actual</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                ventanillas.forEach(v => {
+                    html += `
+                        <tr id="row-${v.municipio}">
+                            <td><strong>${v.municipio}</strong></td>
+                            <td id="usuario-${v.municipio}">${v.usuario}</td>
+                            <td>
+                                <button class="btn-editar" onclick="editarVentanilla('${v.municipio}')">Editar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                document.getElementById('ventanillasTable').innerHTML = html;
+                window.editarVentanilla = editarVentanilla;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('ventanillasTable').innerHTML = '<p style="color:red;">Error cargando ventanillas</p>';
+            }
+        }
+
+        async function editarVentanilla(municipio) {
+            const nuevoUsuario = prompt('Nuevo nombre de usuario para ' + municipio + ':');
+            if (!nuevoUsuario) return;
+            const nuevaPassword = prompt('Nueva contraseña para ' + municipio + ':');
+            if (!nuevaPassword) return;
+
+            try {
+                await actualizarVentanilla(municipio, nuevoUsuario, nuevaPassword);
+                alert('Credenciales actualizadas correctamente');
+                // Aquí seactualiza la tabla --- Oscar
+                document.getElementById(`usuario-${municipio}`).innerText = nuevoUsuario;
+            } catch (error) {
+                alert('Error al actualizar: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Productor - UGRD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <!-- Pongan lo estilos así para no tener que generar otro archivo .css y ahorrar espacio --- Oscar-->
+   <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, #eef2f7, #d9e2ec);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 32px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #1e4b3c;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #4b6b5e;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+        label {
+            font-weight: 600;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 1rem;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+        input:focus {
+            border-color: #1e4b3c;
+            outline: none;
+        }
+        button {
+            background: linear-gradient(145deg, #1e4b3c, #14382d);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .error {
+            color: #b91c1c;
+            margin-top: 15px;
+            display: none;
+        }
+        .btn-volver {
+            background: #6c757d;
+            margin-top: 15px;
+        }
+        .btn-volver:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <img src="ugrd.png" alt="Logo" class="logo">
+        <h2>Sistema Reemo</h2>
+        <div class="subtitle">Acceso para Productores</div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Clave UPP (Registro Único de Predio)</label>
+                <input type="text" id="upp" placeholder="Ej. 10-022-0500-01" required autofocus>
+            </div>
+            <button type="submit"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
+        </form>
+        <div id="errorMsg" class="error">No se encontró un productor con esa UPP. Verifique e intente nuevamente.</div>
+        <button class="btn-volver" onclick="window.location.href='Inicioreemo.html'"><i class="fas fa-arrow-left"></i> Volver al inicio</button>
+    </div>
+
+<!-- ya tenemos lógica de autenticación por UPP, ahora si de veras--- Valeria -->
+    <script type="module">
+        import { buscarProductorPorUPP } from './api.js';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const upp = document.getElementById('upp').value.trim();
+            if (!upp) return;
+
+            try {
+                const productor = await buscarProductorPorUPP(upp);
+                if (productor) {
+                    sessionStorage.setItem('productorId', productor.id);
+                    sessionStorage.setItem('productorUPP', productor.upp);
+                    window.location.href = `productor-perfil.html?id=${productor.id}`;
+                } else {
+                    document.getElementById('errorMsg').style.display = 'block';
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

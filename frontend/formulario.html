@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Productor y Ganado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%); padding: 30px 20px; }
+        .form-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1e4b3c, #2a6e5a); color: white; padding: 35px 40px; display: flex; align-items: center; gap: 20px; }
+        .header i { font-size: 3rem; background: rgba(255,255,255,0.15); padding: 20px; border-radius: 30px; }
+        .header h1 { font-size: 2.2rem; }
+        .form-body { padding: 40px; }
+        .section-title { font-size: 1.8rem; color: #1e4b3c; margin: 40px 0 25px 0; display: flex; align-items: center; gap: 10px; border-bottom: 3px solid #cfe3db; padding-bottom: 10px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 25px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group.full-width { grid-column: span 2; }
+        label { font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 5px; }
+        input, select, textarea { padding: 14px 18px; border: 2px solid #e2e8f0; border-radius: 18px; font-size: 1rem; transition: 0.2s; background: #fafcfc; }
+        input:focus, select:focus, textarea:focus { border-color: #1e4b3c; outline: none; }
+        .required { color: #b91c1c; font-size: 1.2rem; }
+        .livestock-section { background: #f6fbf9; border-radius: 30px; padding: 30px; margin: 20px 0; border: 1px solid #d0e6dd; }
+        .group-card { background: white; border-radius: 24px; padding: 25px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,40,30,0.08); border: 1px solid #e2f0ea; position: relative; }
+        .group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .group-title { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; font-weight: 600; color: #1e4b3c; }
+        .btn-remove-group { background: #fee2e2; color: #991b1b; border: none; width: 40px; height: 40px; border-radius: 40px; cursor: pointer; transition: 0.2s; }
+        .btn-remove-group:hover { background: #fecaca; }
+        .group-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 15px; margin-bottom: 15px; }
+        .field-small { display: flex; flex-direction: column; gap: 5px; }
+        .field-small label { font-size: 0.85rem; color: #2d4a3e; }
+        .field-small input, .field-small select { padding: 10px 12px; border-radius: 14px; }
+        .subtotal { display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #bcd9cf; }
+        .subtotal span:first-child { color: #1e4b3c; font-weight: 600; }
+        .subtotal-value { background: #1e4b3c; color: white; padding: 8px 25px; border-radius: 40px; font-weight: 700; font-size: 1.2rem; }
+        .btn-add-group { background: white; border: 2px dashed #1e4b3c; color: #1e4b3c; padding: 16px 30px; border-radius: 60px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 15px; margin-top: 15px; width: 100%; justify-content: center; }
+        .btn-add-group:hover { background: #e6f4ef; border-style: solid; }
+        .global-total { display: flex; justify-content: flex-end; align-items: center; gap: 30px; margin: 40px 0 30px; padding: 20px 30px; background: linear-gradient(145deg, #1e4b3c, #14382d); border-radius: 60px; color: white; }
+        .global-total span:first-child { font-size: 1.5rem; }
+        .global-total-value { font-size: 2.5rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 8px 40px; border-radius: 60px; }
+        .buttons { display: flex; justify-content: space-between; margin-top: 40px; gap: 20px; }
+        .btn { padding: 18px 40px; border: none; border-radius: 60px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 15px; text-decoration: none; }
+        .btn-primary { background: linear-gradient(145deg, #1e4b3c, #14382d); color: white; box-shadow: 0 10px 20px rgba(30,75,60,0.3); }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-secondary { background: #edf2f7; color: #1e293b; border: 1px solid #cbd5e1; }
+        .vaca {box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; background-color: #1e4b3c; border-radius: 50%; width: 5%;}
+        @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } .group-fields { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="header">
+            <img src="imagenes/vaca.png" alt="logovaca" width="10%">
+            <div><h1>Registro de Productor y Ganado</h1><p>Complete los datos del productor y el inventario de animales</p></div>
+        </div>
+        <form id="registroForm" class="form-body">
+            <div class="section-title"><i class="fas fa-user-circle"></i> Datos del productor</div>
+            <div class="grid-2">
+                <div class="form-group"><label><i class="fas fa-user"></i> Nombre completo <span class="required">*</span></label><input type="text" name="nombre" id="nombre" required></div>
+                <div class="form-group"><label><i class="fas fa-home"></i> Rancho <span class="required">*</span></label><input type="text" name="rancho" id="rancho" required></div>
+                <div class="form-group">
+                    <label><i class="fas fa-map-marker-alt"></i> Municipio <span class="required">*</span></label>
+                    <select name="municipio" id="municipio" required>
+                        <option value="">Cargando municipios...</option>
+                    </select>
+                </div>
+                <div class="form-group"><label><i class="fas fa-location-dot"></i> Localidad / Paraje</label><input type="text" name="localidad" id="localidad"></div>
+                <div class="form-group"><label><i class="fas fa-file-contract"></i> Tenencia</label><select name="tenencia" id="tenencia"><option value="">Seleccione</option><option value="Ejidal">Ejidal</option><option value="Privada">Privada</option><option value="Comunal">Comunal</option><option value="Renta">Renta</option><option value="Otro">Otro</option></select></div>
+                <div class="form-group"><label><i class="fas fa-tag"></i> Patente de Fierro</label><input type="text" name="patente" id="patente"></div>
+                <div class="form-group"><label><i class="fas fa-phone"></i> Teléfono <span class="required">*</span></label><input type="tel" name="telefono" id="telefono" required></div>
+                <div class="form-group"><label><i class="fas fa-calendar-plus"></i> Fecha de alta</label><input type="date" name="fecha_alta" id="fechaAlta" required></div>
+                <div class="form-group"><label><i class="fas fa-id-card"></i> Registro UMA</label><input type="text" name="uma" id="uma"></div>
+                <div class="form-group"><label><i class="fas fa-map-pin"></i> Colonia</label><input type="text" name="colonia" id="colonia"></div>
+                <div class="form-group"><label><i class="fas fa-road"></i> Calle y número</label><input type="text" name="calle" id="calle"></div>
+                <div class="form-group"><label><i class="fas fa-layer-group"></i> UPP</label><input type="text" name="upp" id="upp"></div>
+                <div class="form-group"><label><i class="fas fa-folder-open"></i> Folio</label><input type="text" name="folio" id="folio"></div>
+                <div class="form-group full-width"><label><i class="fas fa-pen"></i> Observaciones</label><textarea name="observaciones" id="observaciones" rows="3"></textarea></div>
+            </div>
+
+            <div class="section-title"><img class="vaca" src="imagenes/vaca.png" alt="logovaca" > Registro de ganado</div>
+            <div id="grupos-ganado" class="livestock-section"></div>
+            <button type="button" class="btn-add-group" id="agregarGrupoBtn"><i class="fas fa-plus-circle"></i> Agregar otro grupo de animales</button>
+            <div class="global-total"><span>Total de cabezas:</span><span class="global-total-value" id="totalGlobal">0</span></div>
+            <div class="buttons">
+                <a href="ventanilla.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar registro</button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { crearProductor, actualizarProductor, obtenerProductor } from './api.js';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const productorId = urlParams.get('productor');
+        const accion = urlParams.get('accion');
+
+        const contenedorGrupos = document.getElementById('grupos-ganado');
+        const agregarBtn = document.getElementById('agregarGrupoBtn');
+
+        // Ya terminé la parte de carga de municipios y preselección según la ventanilla --- Diego
+        const ventanillaUser = sessionStorage.getItem('ventanillaUser');
+        async function cargarMunicipios() {
+            try {
+                const response = await fetch('/api/municipios');
+                const municipios = await response.json();
+                const select = document.getElementById('municipio');
+                select.innerHTML = '<option value="">Seleccione un municipio</option>';
+                municipios.forEach(m => {
+                    const option = document.createElement('option');
+                    option.value = m;
+                    option.textContent = m;
+                    select.appendChild(option);
+                });
+                if (ventanillaUser) {
+                    const encontrado = municipios.find(m => m.toLowerCase() === ventanillaUser.toLowerCase());
+                    if (encontrado) {
+                        select.value = encontrado;
+                    } else {
+                        select.value = ventanillaUser;
+                    }
+                }
+            } catch (error) {
+                console.error('Error cargando municipios:', error);
+            }
+        }
+        cargarMunicipios();
+
+        function actualizarSubtotal(grupoDiv) {
+            const cantidades = grupoDiv.querySelectorAll('.input-total');
+            let suma = 0;
+            cantidades.forEach(inp => suma += parseInt(inp.value) || 0);
+            grupoDiv.querySelector('.subtotal-value').textContent = suma;
+        }
+
+        function actualizarTotalGlobal() {
+            const grupos = document.querySelectorAll('.group-card');
+            let total = 0;
+            grupos.forEach(grupo => {
+                total += parseInt(grupo.querySelector('.subtotal-value')?.textContent) || 0;
+            });
+            document.getElementById('totalGlobal').textContent = total;
+        }
+
+        // Ya resolví el problema de los grupos de ganado que no se mostraban --- Diego
+        function crearGrupoDesdeDatos(grupo, index) {
+            const grupoDiv = document.createElement('div');
+            grupoDiv.className = 'group-card';
+            grupoDiv.dataset.grupoId = Date.now() + index;
+            grupoDiv.innerHTML = `
+                <div class="group-header">
+                    <div class="group-title"><i class="fas fa-${index === 0 ? 'cow' : 'dragon'}"></i> Grupo de animales ${index+1}</div>
+                    <button type="button" class="btn-remove-group" onclick="window.eliminarGrupo(this)"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="group-fields">
+                    <div class="field-small"><label>Especie</label><select name="especie" class="especie-select"><option value="bovino">Bovino</option><option value="ovino">Ovino</option><option value="caprino">Caprino</option><option value="porcino">Porcino</option><option value="equino">Equino</option></select></div>
+                    <div class="field-small"><label>Raza</label><input type="text" name="raza" class="raza-input"></div>
+                    <div class="field-small" style="display: flex; flex-direction: row; align-items: center;"><label style="display:flex; gap:5px;"><input type="checkbox" name="cruza" class="cruza-check"> ¿Cruza?</label></div>
+                    <div class="field-small"><label>Vientres</label><input type="number" name="vientres" min="0" value="0" class="cantidad input-total"></div>
+                    <div class="field-small"><label>Crías</label><input type="number" name="crias" min="0" value="0" class="cantidad input-total"></div>
+                    <div class="field-small"><label>Sementales</label><input type="number" name="sementales" min="0" value="0" class="cantidad input-total"></div>
+                    <div class="field-small"><label>Vaquillas</label><input type="number" name="vaquillas" min="0" value="0" class="cantidad input-total"></div>
+                    <div class="field-small"><label>Novillos</label><input type="number" name="novillos" min="0" value="0" class="cantidad input-total"></div>
+                    <div class="field-small"><label>Engorda</label><input type="number" name="engorda" min="0" value="0" class="cantidad input-total"></div>
+                    <div class="field-small"><label>Otras (cant.)</label><input type="number" name="otras_cant" min="0" value="0" class="cantidad input-total"></div>
+                    <div class="field-small" style="grid-column: span 2;"><label>Especificar otras</label><input type="text" name="otras_espec"></div>
+                </div>
+                <div class="subtotal"><span>Subtotal de este grupo:</span><span class="subtotal-value">0</span></div>
+            `;
+
+            grupoDiv.querySelector('.especie-select').value = grupo.especie;
+            grupoDiv.querySelector('.raza-input').value = grupo.raza || '';
+            if (grupo.cruza) grupoDiv.querySelector('.cruza-check').checked = true;
+            grupoDiv.querySelector('[name="vientres"]').value = grupo.vientres;
+            grupoDiv.querySelector('[name="crias"]').value = grupo.crias;
+            grupoDiv.querySelector('[name="sementales"]').value = grupo.sementales;
+            grupoDiv.querySelector('[name="vaquillas"]').value = grupo.vaquillas;
+            grupoDiv.querySelector('[name="novillos"]').value = grupo.novillos;
+            grupoDiv.querySelector('[name="engorda"]').value = grupo.engorda;
+            grupoDiv.querySelector('[name="otras_cant"]').value = grupo.otras_cant;
+            grupoDiv.querySelector('[name="otras_espec"]').value = grupo.otras_espec || '';
+
+            const inputs = grupoDiv.querySelectorAll('.input-total');
+            inputs.forEach(inp => {
+                inp.addEventListener('input', () => {
+                    actualizarSubtotal(grupoDiv);
+                    actualizarTotalGlobal();
+                });
+            });
+            actualizarSubtotal(grupoDiv);
+            return grupoDiv;
+        }
+
+        function crearGrupo(index) {
+            return crearGrupoDesdeDatos({
+                especie: 'bovino', raza: '', cruza: false,
+                vientres: 0, crias: 0, sementales: 0, vaquillas: 0, novillos: 0, engorda: 0, otras_cant: 0, otras_espec: ''
+            }, index);
+        }
+
+        window.eliminarGrupo = function(btn) {
+            const grupo = btn.closest('.group-card');
+            if (grupo && confirm('¿Eliminar este grupo?')) {
+                grupo.remove();
+                actualizarTotalGlobal();
+                const grupos = document.querySelectorAll('.group-card');
+                grupos.forEach((g, idx) => {
+                    const titulo = g.querySelector('.group-title');
+                    if (titulo) titulo.innerHTML = `<i class="fas fa-${idx === 0 ? 'cow' : 'dragon'}"></i> Grupo de animales ${idx+1}`;
+                });
+            }
+        };
+
+        async function cargarProductorParaEdicion(id) {
+            try {
+                const productor = await obtenerProductor(id);
+                document.getElementById('nombre').value = productor.nombre;
+                document.getElementById('rancho').value = productor.rancho;
+                document.getElementById('municipio').value = productor.municipio;
+                document.getElementById('localidad').value = productor.localidad || '';
+                document.getElementById('tenencia').value = productor.tenencia || '';
+                document.getElementById('patente').value = productor.patente || '';
+                document.getElementById('telefono').value = productor.telefono;
+                document.getElementById('fechaAlta').value = productor.fecha_alta || '';
+                document.getElementById('uma').value = productor.uma || '';
+                document.getElementById('colonia').value = productor.colonia || '';
+                document.getElementById('calle').value = productor.calle || '';
+                document.getElementById('upp').value = productor.upp || '';
+                document.getElementById('folio').value = productor.folio || '';
+                document.getElementById('observaciones').value = productor.observaciones || '';
+                if (productor.gruposGanado && productor.gruposGanado.length) {
+                    contenedorGrupos.innerHTML = '';
+                    productor.gruposGanado.forEach((grupo, idx) => {
+                        const grupoDiv = crearGrupoDesdeDatos(grupo, idx);
+                        contenedorGrupos.appendChild(grupoDiv);
+                    });
+                    actualizarTotalGlobal();
+                } else {
+                    const grupoDiv = crearGrupo(0);
+                    contenedorGrupos.appendChild(grupoDiv);
+                }
+            } catch (error) {
+                console.error('Error cargando productor:', error);
+                alert('No se pudo cargar el productor para editar');
+            }
+        }
+
+        function obtenerDatosFormulario() {
+            const productor = {
+                nombre: document.getElementById('nombre').value,
+                rancho: document.getElementById('rancho').value,
+                municipio: document.getElementById('municipio').value,
+                localidad: document.getElementById('localidad').value,
+                tenencia: document.getElementById('tenencia').value,
+                telefono: document.getElementById('telefono').value,
+                fecha_alta: document.getElementById('fechaAlta').value,
+                patente: document.getElementById('patente').value,
+                uma: document.getElementById('uma').value,
+                colonia: document.getElementById('colonia').value,
+                calle: document.getElementById('calle').value,
+                upp: document.getElementById('upp').value,
+                folio: document.getElementById('folio').value,
+                observaciones: document.getElementById('observaciones').value
+            };
+            const gruposGanado = [];
+            const gruposDom = document.querySelectorAll('.group-card');
+            gruposDom.forEach(grupo => {
+                gruposGanado.push({
+                    especie: grupo.querySelector('.especie-select').value,
+                    raza: grupo.querySelector('.raza-input').value,
+                    cruza: grupo.querySelector('.cruza-check').checked,
+                    vientres: parseInt(grupo.querySelector('[name="vientres"]').value) || 0,
+                    crias: parseInt(grupo.querySelector('[name="crias"]').value) || 0,
+                    sementales: parseInt(grupo.querySelector('[name="sementales"]').value) || 0,
+                    vaquillas: parseInt(grupo.querySelector('[name="vaquillas"]').value) || 0,
+                    novillos: parseInt(grupo.querySelector('[name="novillos"]').value) || 0,
+                    engorda: parseInt(grupo.querySelector('[name="engorda"]').value) || 0,
+                    otras_cant: parseInt(grupo.querySelector('[name="otras_cant"]').value) || 0,
+                    otras_espec: grupo.querySelector('[name="otras_espec"]').value
+                });
+            });
+            return { productor, gruposGanado };
+        }
+
+        agregarBtn.addEventListener('click', () => {
+            const nuevo = crearGrupo(contenedorGrupos.children.length);
+            contenedorGrupos.appendChild(nuevo);
+            actualizarTotalGlobal();
+        });
+
+        document.getElementById('registroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { productor, gruposGanado } = obtenerDatosFormulario();
+            if (!productor.nombre || !productor.rancho || !productor.municipio || !productor.telefono) {
+                alert('Complete los campos obligatorios: nombre, rancho, municipio, teléfono. Fecha de Alta');
+                return;
+            }
+            if (gruposGanado.length === 0) {
+                alert('Debe agregar al menos un grupo de ganado.');
+                return;
+            }
+            try {
+                if (productorId && accion === 'editar') {
+                    await actualizarProductor(productorId, productor, gruposGanado);
+                    alert('Productor actualizado correctamente.');
+                } else {
+                    const res = await crearProductor(productor, gruposGanado);
+                    alert('Productor creado con ID: ' + res.id);
+                }
+                window.location.href = 'ventanilla.html';
+            } catch (error) {
+                console.error(error);
+                alert('Error al guardar: ' + error.message);
+            }
+        });
+
+        // Ya terminé la parte para que se generara el folio automático --- Oscar
+        function generarFolio() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const rancho = document.getElementById('rancho').value.trim();
+            const municipio = document.getElementById('municipio').value;
+            if (!nombre || !rancho || !municipio) return;
+
+            let nombrePart = nombre.replace(/[áéíóúü]/g, function(match) {
+                const acentos = {á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
+                return acentos[match] || match;
+            }).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+            if (nombrePart.length < 2) nombrePart = nombrePart.padEnd(2, 'X');
+
+            let ranchoPart = rancho.replace(/[áéíóúü]/g, function(match) {
+                const acentos = {á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
+                return acentos[match] || match;
+            }).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+            if (ranchoPart.length < 2) ranchoPart = ranchoPart.padEnd(2, 'X');
+
+            let muniPart = municipio.replace(/[áéíóúü]/g, function(match) {
+                const acentos = {á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
+                return acentos[match] || match;
+            }).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+            if (muniPart.length < 2) muniPart = muniPart.padEnd(2, 'X');
+
+            const numero = Math.floor(Math.random() * 9000 + 1000);
+            const folio = `${muniPart}-${nombrePart}-${ranchoPart}-${numero}`;
+            document.getElementById('folio').value = folio;
+        }
+
+        document.getElementById('nombre').addEventListener('input', generarFolio);
+        document.getElementById('rancho').addEventListener('input', generarFolio);
+        document.getElementById('municipio').addEventListener('change', generarFolio);
+
+        if (productorId && accion === 'editar') {
+            cargarProductorParaEdicion(productorId);
+        } else {
+            const grupoVacio = crearGrupo(0);
+            contenedorGrupos.appendChild(grupoVacio);
+            actualizarTotalGlobal();
+            document.getElementById('fechaAlta').value = new Date().toISOString().split('T')[0];
+            generarFolio();
+        }
+    </script>
+</body>
+</html>

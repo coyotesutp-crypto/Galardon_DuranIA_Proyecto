@@ -1,0 +1,233 @@
+.navbar-global {
+    background-color: var(--dark-green);
+    padding: 0.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.sobrenosotros{
+    color: #f0efeb;
+    font-size: large;
+    list-style: none;
+}
+.bienvenido{
+    font-size: xx-large;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.nav-logo:hover {
+    opacity: 0.85;
+}
+
+.logo-img {
+    height: 45px; 
+    width: auto;
+    object-fit: contain;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+.main-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.sub-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--gold);
+}
+
+:root {
+    --dark-green: #4a3728;
+    --cream: #fdfcf6;
+    --gold: #d4a017;
+    --text-brown: #4a3728;
+}
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--cream);
+    color: var(--text-brown);
+}
+
+.navbar {
+    background-color: var(--dark-green);
+    padding: 1rem 3rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-left: 2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.hero {
+    text-align: center;
+    padding: 4rem 1rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.logo-container {
+    width: 180px;
+    height: 180px;
+    background: white;
+    border-radius: 50%;
+    margin: 0 auto 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden; 
+    border: 2px solid #f0efeb; 
+}
+
+.main-logo {
+    width: 80%; 
+    height: 80%;
+    object-fit: contain; 
+    transition: transform 0.3s ease;
+}
+
+.logo-container:hover .main-logo {
+    transform: scale(1.05); 
+}
+.logo-tag {
+    width: 80px;
+    height: 80px;
+    background: var(--dark-green);
+    border-radius: 12px;
+    transform: rotate(45deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cow-icon {
+    transform: rotate(-45deg);
+    font-size: 2.5rem;
+}
+
+h1 { font-size: 4rem; margin: 0; }
+.subtitle { color: var(--dark-green); letter-spacing: 4px; font-weight: bold; }
+.accent-line { width: 80px; height: 5px; background: var(--gold); margin: 1.5rem auto; }
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto 4rem;
+    padding: 0 2rem;
+}
+
+.card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    transition: transform 0.3s ease;
+}
+
+.card:hover { transform: translateY(-10px); }
+
+.icon-box {
+    width: 50px;
+    height: 50px;
+    background: var(--dark-green);
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-primary {
+    display: inline-block;
+    background: var(--gold);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
+.footer {
+
+    background: var(--dark-green);
+    color: white;
+background-repeat: no-repeat;
+background-position: center;
+    background-image: url(imagenes/footer.png);
+    background-size: cover;
+
+    text-align: center;
+    padding: 0;
+    margin-top: auto;
+}
+.abajito{
+    background-color: #000000bb;
+    border-radius: 0;
+    padding: 50px;
+    margin: 0;
+}
+.logos-cont{
+    display: flex;
+    justify-content: center;   
+    align-items: center;
+    gap: 40px;                 
+    flex-wrap: wrap;         
+    padding: 20px 0;
+}
+
+.footer-logo{
+    height: 60px;              
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
