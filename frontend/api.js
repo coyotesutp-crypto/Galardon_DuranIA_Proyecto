@@ -1,5 +1,5 @@
-// api.js
-const API_BASE = '';  // vacío para usar rutas relativas
+
+const API_BASE = '';  
 
 export async function obtenerProductores(municipio) {
     const url = `/api/productores?municipio=${municipio}`;
