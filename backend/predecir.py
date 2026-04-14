@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 ---- Diego
 import sys
 import json
 import joblib
@@ -15,7 +15,6 @@ if len(sys.argv) < 2:
 try:
     datos_json = sys.argv[1]
     features = json.loads(datos_json) 
-    # Convertir a array numpy
     X = np.array(features)
     predicciones = modelo.predict_proba(X)[:, 1]  # probabilidad de clase 1 (riesgo alto)
     # Retornar
