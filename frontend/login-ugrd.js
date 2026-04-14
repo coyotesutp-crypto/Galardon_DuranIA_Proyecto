@@ -1,14 +1,18 @@
-//Ya terminé la alidación de credenciales --- Oscar 
-<script src="login-ugrd.js" defer></script>
-document.getElementById('login-admin-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const user = document.getElementById('admin-user').value;
-    const pass = document.getElementById('admin-pass').value;
+// Ya terminé la validación de credenciales --- Oscar
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('login-admin-form');
+    if (!form) return;
 
-    if (user === 'adminugrd' && pass === 'admin123') {
-        sessionStorage.setItem('adminActive', JSON.stringify({ user: 'admin_ugrd' }));
-        window.location.href = 'ugrd.html';
-    } else {
-        alert('Credenciales incorrectas');
-    }
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('admin-user').value.trim();
+        const pass = document.getElementById('admin-pass').value.trim();
+      
+        if (user === 'adminugrd' && pass === 'admin123') {
+            sessionStorage.setItem('adminActive', JSON.stringify({ user: 'admin_ugrd' }));
+            window.location.href = 'ugrd.html';
+        } else {
+            alert('Credenciales incorrectas');
+        }
+    });
 });

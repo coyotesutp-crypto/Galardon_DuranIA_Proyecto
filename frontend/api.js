@@ -31,7 +31,10 @@ export async function crearProductor(productor, gruposGanado) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productor, gruposGanado })
     });
-    if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(JSON.stringify(errorData));
+    }
     return response.json();
 }
 
@@ -41,6 +44,9 @@ export async function actualizarProductor(id, productor, gruposGanado) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productor, gruposGanado })
     });
-    if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(JSON.stringify(errorData));
+    }
     return response.json();
 }

@@ -5,6 +5,13 @@
     <title>UGRD - Administración Estatal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
         * {
             margin: 0;
             padding: 0;
@@ -163,7 +170,52 @@
             <a href="Inicioreemo.html" class="btn-editar" style="background: #6c757d; text-decoration: none;"><i class="fas fa-home"></i> Volver al inicio</a>
         </div>
     </div>
-
+<!-- Predicción de Riesgos Sanitarios de aqui para abajo (esto es en lo visual) ---Oscar -->
+<div class="card" style="margin-top: 30px;">
+    <h2><i class="fas fa-chart-line"></i> Predicción de Riesgo Sanitario (Gusano Barrenador)</h2>
+    <div style="margin-bottom: 15px;">
+        <button id="btnRecalcularRiesgo" class="btn-editar" style="background: #1e4b3c;"><i class="fas fa-sync-alt"></i> Actualizar predicción</button>
+        <button id="btnEntrenar" class="btn-editar" style="background: #d4a017; margin-left: 10px;"><i class="fas fa-brain"></i> Reentrenar IA (próximamente)</button>
+    </div>
+    <div id="riesgoContainer" style="overflow-x: auto;">
+        <table style="width: 100%;">
+            <thead>
+                <tr><th>Municipio</th><th>Riesgo</th><th>Nivel</th><th>Densidad (cabezas/productor)</th><th>Casos recientes</th><th>Animales afectados</th><th>Temperatura</th><th>Humedad</th></tr>
+            </thead>
+            <tbody id="riesgoTableBody">
+                <tr><td colspan="8" style="text-align: center;">Cargando datos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Formulario para nuevos casos fe aqui para abajo -->
+<div class="card" style="margin-top: 30px;">
+    <h2><i class="fas fa-plus-circle"></i> Reportar nuevo caso de gusano barrenador</h2>
+    <form id="reporteCasoForm" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px;">Municipio</label>
+            <select id="casoMunicipio" required style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
+                <option value="">Seleccione</option>
+                        </select>
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px;">Número de animales afectados</label>
+            <input type="number" id="casoAnimales" min="1" value="1" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px;">Fuente</label>
+            <select id="casoFuente" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
+                <option value="inspeccion">Inspección de campo</option>
+                <option value="reporte_productor">Reporte del productor</option>
+                <option value="oficial">Oficial de sanidad</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn-editar" style="background: #1e4b3c; padding: 8px 20px;"><i class="fas fa-save"></i> Registrar caso</button>
+        </div>
+    </form>
+    <div id="mensajeCaso" style="margin-top: 10px; display: none; padding: 8px; border-radius: 8px;"></div>
+</div>
     <script type="module">
         import { obtenerVentanillas, actualizarVentanilla, obtenerEstadisticas } from './admin-api.js';
 
@@ -261,6 +313,129 @@
                 alert('Error al actualizar: ' + error.message);
             }
         }
-    </script>
+     
+     
+     
+     
+        // SECCIÓN DE RIESGO SANITARIO de aquí para abajo
+    async function cargarRiesgo() {
+    try {
+        const response = await fetch('/api/prediccion-ml');
+        const data = await response.json();
+        const tbody = document.getElementById('riesgoTableBody');
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="3">No hay datos de riesgo disponibles.</td></tr>';
+            return;
+        }
+        let html = '';
+        data.forEach(row => {
+            const nivelColor = row.nivel === 'Alto' ? '#b91c1c' : (row.nivel === 'Medio' ? '#d4a017' : '#1e4b3c');
+            html += `
+                <tr>
+                    <td><strong>${row.municipio}</strong></td>
+                    <td>${(row.riesgo * 100).toFixed(0)}%</td>
+                    <td><span class="badge" style="background:${nivelColor}; color:white;">${row.nivel}</span></td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    } catch (error) {
+        console.error('Error cargando riesgo IA:', error);
+        document.getElementById('riesgoTableBody').innerHTML = '<tr><td colspan="3">Error al cargar predicción.</td></tr>';
+    }
+}
+    // Botón recalcular
+    document.getElementById('btnRecalcularRiesgo').addEventListener('click', () => {
+        cargarRiesgo(true);
+    });
+
+    // Botón Reentrenar IA
+  document.getElementById('btnEntrenar').addEventListener('click', async () => {
+    const respuesta = confirm('¿Reentrenar el modelo de IA con los datos históricos reales? Esto puede tomar unos segundos.');
+    if (!respuesta) return;
+    try {
+        const response = await fetch('/api/reentrenar-ia', { method: 'POST' });
+        const data = await response.json();
+        alert(data.mensaje || 'Modelo reentrenado');
+        cargarRiesgo();
+    } catch (error) {
+        alert('Error al reentrenar: ' + error.message);
+    }
+});
+
+async function cargarMunicipiosParaSelect() {
+    try {
+        const response = await fetch('/api/municipios');
+        const municipios = await response.json();
+        const select = document.getElementById('casoMunicipio');
+        select.innerHTML = '<option value="">Seleccione un municipio</option>';
+        municipios.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m;
+            option.textContent = m;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando municipios:', error);
+    }
+}
+  
+
+async function reportarCaso(event) {
+    event.preventDefault();
+    const municipio = document.getElementById('casoMunicipio').value;
+    const numAnimales = document.getElementById('casoAnimales').value;
+    const fuente = document.getElementById('casoFuente').value;
+
+    if (!municipio) {
+        mostrarMensaje('Seleccione un municipio', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/casos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                municipio: municipio,
+                enfermedad: 'barrenador',
+                num_animales_afectados: numAnimales,
+                fuente: fuente
+            })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            mostrarMensaje('Caso registrado correctamente. La predicción se actualizará.', 'exito');
+            document.getElementById('casoMunicipio').value = '';
+            document.getElementById('casoAnimales').value = '1';
+            cargarRiesgo();
+        } else {
+            mostrarMensaje('Error: ' + (data.error || 'No se pudo registrar'), 'error');
+        }
+    } catch (error) {
+        mostrarMensaje('Error de conexión: ' + error.message, 'error');
+    }
+}
+
+function mostrarMensaje(texto, tipo) {
+    const div = document.getElementById('mensajeCaso');
+    div.textContent = texto;
+    div.style.display = 'block';
+    div.style.backgroundColor = tipo === 'exito' ? '#d4edda' : '#f8d7da';
+    div.style.color = tipo === 'exito' ? '#155724' : '#721c24';
+    div.style.border = '1px solid ' + (tipo === 'exito' ? '#c3e6cb' : '#f5c6cb');
+    setTimeout(() => {
+        div.style.display = 'none';
+    }, 4000);
+}
+
+cargarMunicipiosParaSelect();
+
+const formCaso = document.getElementById('reporteCasoForm');
+if (formCaso) {
+    formCaso.addEventListener('submit', reportarCaso);
+}
+    cargarRiesgo();
+  </script>
 </body>
 </html>

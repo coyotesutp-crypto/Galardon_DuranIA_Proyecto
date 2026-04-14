@@ -299,6 +299,18 @@
                 alert('Debe agregar al menos un grupo de ganado.');
                 return;
             }
+                        // Validación previa de crías vs vientres
+            const gruposDom = document.querySelectorAll('.group-card');
+            let errorGrupos = false;
+            gruposDom.forEach((grupo, idx) => {
+                const crias = parseInt(grupo.querySelector('[name="crias"]').value) || 0;
+                const vientres = parseInt(grupo.querySelector('[name="vientres"]').value) || 0;
+                if (crias > vientres) {
+                    alert(`En el grupo ${idx+1}, las crías (${crias}) no pueden ser mayores que los vientres (${vientres}).`);
+                    errorGrupos = true;
+                }
+            });
+            if (errorGrupos) return;
             try {
                 if (productorId && accion === 'editar') {
                     await actualizarProductor(productorId, productor, gruposGanado);
@@ -310,7 +322,22 @@
                 window.location.href = 'ventanilla.html';
             } catch (error) {
                 console.error(error);
-                alert('Error al guardar: ' + error.message);
+              let mensaje = 'Error al guardar: ';
+            if (error.message) {
+                try {
+                    const errorData = JSON.parse(error.message);
+                    if (errorData.detalles) {
+                        mensaje += '\n' + errorData.detalles.join('\n');
+                    } else {
+                        mensaje += errorData.error || error.message;
+                    }
+                } catch (e) {
+                    mensaje += error.message;
+                }
+            } else {
+                mensaje += error;
+            }
+            alert(mensaje);
             }
         });
 
