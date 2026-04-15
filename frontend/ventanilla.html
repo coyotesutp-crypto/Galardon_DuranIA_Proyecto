@@ -51,197 +51,77 @@
     <div class="ventanilla-container">
         <div class="header">
             <i class="fas fa-address-book"></i>
-            <div>
-                <h1>Ventanilla de Productores</h1>
-                <p>Gestione los productores de su municipio</p>
-            </div>
-            <div class="user-info" id="userInfo">
-                <i class="fas fa-user-circle"></i>
-                <span id="usernameDisplay">Usuario</span>
-                <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</button>
-            </div>
+            <div><h1>Ventanilla de Productores</h1><p>Gestione los productores de su municipio</p></div>
+            <div class="user-info"><i class="fas fa-user-circle"></i><span id="usernameDisplay">Usuario</span><button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</button></div>
         </div>
-
         <div class="content">
             <div class="action-bar">
                 <a href="formulario.html" class="btn-agregar"><i class="fas fa-plus-circle"></i> Nuevo productor</a>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar por nombre, rancho o teléfono...">
-                </div>
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Buscar por nombre, rancho o teléfono..."></div>
                 <button id="exportExcelBtn" class="btn-export"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
             </div>
-
             <div class="table-container">
-                <table id="productoresTable">
-                    <thead>
-                        <tr><th>Nombre</th><th>Rancho</th><th>Municipio</th><th>Teléfono</th><th>Total cabezas</th><th>Acciones</th>\
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                 </table>
-                <div id="emptyMessage" class="empty-state" style="display: none;">
-                    <i class="fas fa-frown"></i>
-                    <h3>No hay productores en este municipio</h3>
-                    <p>Comienza agregando un nuevo productor.</p>
-                </div>
+                <table id="productoresTable"><thead><tr><th>Nombre</th><th>Rancho</th><th>Municipio</th><th>Teléfono</th><th>Total cabezas</th><th>Acciones</th></tr></thead><tbody id="tableBody"></tbody></table>
+                <div id="emptyMessage" class="empty-state" style="display: none;"><i class="fas fa-frown"></i><h3>No hay productores en este municipio</h3><p>Comienza agregando un nuevo productor.</p></div>
             </div>
             <div class="pagination" id="pagination"></div>
         </div>
     </div>
     <script type="module">
         import { obtenerProductores } from './api.js';
-
-        // ya funcionanda la verificación de sesión y la redirección al login si no hay sesión --Valeria.
         function verificarSesion() {
             const user = sessionStorage.getItem('ventanillaUser');
-            console.log('Usuario de sesión:', user);
-            if (!user) {
-                window.location.href = 'loginventanilla.html';
-                return false;
-            } else {
-                document.getElementById('usernameDisplay').textContent = user;
-                return user;
-            }
+            if (!user) { window.location.href = 'loginventanilla.html'; return false; }
+            else { document.getElementById('usernameDisplay').textContent = user; return user; }
         }
-
         const user = verificarSesion();
-        if (!user) {
-            throw new Error('No hay sesión');
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            sessionStorage.removeItem('ventanillaUser');
-            window.location.href = 'loginventanilla.html';
-        });
-
+        if (!user) throw new Error('No hay sesión');
+        document.getElementById('logoutBtn').addEventListener('click', () => { sessionStorage.removeItem('ventanillaUser'); window.location.href = 'loginventanilla.html'; });
         const municipioUsuario = user.charAt(0).toUpperCase() + user.slice(1).toLowerCase();
-        console.log('Municipio a buscar:', municipioUsuario);
-
         const searchInput = document.getElementById('searchInput');
         const tableBody = document.getElementById('tableBody');
         const emptyMessage = document.getElementById('emptyMessage');
         const paginationDiv = document.getElementById('pagination');
         const exportBtn = document.getElementById('exportExcelBtn');
-
-        let productoresDelMunicipio = [];
-        let filteredProductores = [];
-        let currentPage = 1;
-        const rowsPerPage = 5;
-
-        // ya calcula el total de cabezas sumando los grupos de ganado ---Diego.
+        let productoresDelMunicipio = [], filteredProductores = [], currentPage = 1, rowsPerPage = 5;
         function calcularTotalCabezas(prod) {
             let total = 0;
-            if (prod.gruposGanado) {
-                prod.gruposGanado.forEach(grupo => {
-                    total += (parseInt(grupo.vientres) || 0) +
-                             (parseInt(grupo.crias) || 0) +
-                             (parseInt(grupo.sementales) || 0) +
-                             (parseInt(grupo.vaquillas) || 0) +
-                             (parseInt(grupo.novillos) || 0) +
-                             (parseInt(grupo.engorda) || 0) +
-                             (parseInt(grupo.otras_cant) || 0);
-                });
-            }
+            if (prod.gruposGanado) prod.gruposGanado.forEach(grupo => { total += (parseInt(grupo.vientres)||0)+(parseInt(grupo.crias)||0)+(parseInt(grupo.sementales)||0)+(parseInt(grupo.vaquillas)||0)+(parseInt(grupo.novillos)||0)+(parseInt(grupo.engorda)||0)+(parseInt(grupo.otras_cant)||0); });
             return total;
         }
         function renderTabla() {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const pageData = filteredProductores.slice(start, end);
-
-            if (filteredProductores.length === 0) {
-                tableBody.innerHTML = '';
-                emptyMessage.style.display = 'block';
-                paginationDiv.innerHTML = '';
-                return;
-            }
-            emptyMessage.style.display = 'none';
-
-            let html = '';
+            const start = (currentPage-1)*rowsPerPage, end = start+rowsPerPage, pageData = filteredProductores.slice(start,end);
+            if (filteredProductores.length===0) { tableBody.innerHTML=''; emptyMessage.style.display='block'; paginationDiv.innerHTML=''; return; }
+            emptyMessage.style.display='none';
+            let html='';
             pageData.forEach(prod => {
                 const total = calcularTotalCabezas(prod);
-                html += `
-                    <tr>
-                        <td><strong>${prod.nombre}</strong><br><small>${prod.localidad || ''}</small></td>
-                        <td>${prod.rancho}</td>
-                        <td><span class="badge">${prod.municipio}</span></td>
-                        <td>${prod.telefono}</td>
-                        <td>${total}</td>
-                        <td class="action-buttons">
-                            <a href="perfil.html?id=${prod.id}" class="btn-icon" title="Ver perfil"><i class="fas fa-eye"></i></a>
-                            <a href="formulario.html?productor=${prod.id}&accion=editar" class="btn-icon" title="Editar datos"><i class="fas fa-edit"></i></a>
-                            <a href="formulario.html?productor=${prod.id}&accion=agregarGanado" class="btn-icon" title="Agregar ganado"><i class="fas fa-paw"></i></a>
-                        </td>
-                    </tr>
-                `;
+                html += `<tr><td><strong>${prod.nombre}</strong><br><small>${prod.localidad||''}</small></td><td>${prod.rancho}</td><td><span class="badge">${prod.municipio}</span></td><td>${prod.telefono}</td><td>${total}</td><td class="action-buttons"><a href="productor-perfil.html?id=${prod.id}" class="btn-icon" title="Ver perfil"><i class="fas fa-eye"></i></a><a href="formulario.html?productor=${prod.id}&accion=editar" class="btn-icon" title="Editar datos"><i class="fas fa-edit"></i></a><a href="formulario.html?productor=${prod.id}&accion=agregarGanado" class="btn-icon" title="Agregar ganado"><i class="fas fa-paw"></i></a></td></tr>`;
             });
             tableBody.innerHTML = html;
-
-            const totalPages = Math.ceil(filteredProductores.length / rowsPerPage);
+            const totalPages = Math.ceil(filteredProductores.length/rowsPerPage);
             let pagHtml = '';
-            for (let i = 1; i <= totalPages; i++) {
-                pagHtml += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.irPagina(${i})">${i}</button>`;
-            }
+            for(let i=1;i<=totalPages;i++) pagHtml += `<button class="${i===currentPage?'active':''}" onclick="window.irPagina(${i})">${i}</button>`;
             paginationDiv.innerHTML = pagHtml;
         }
-
-        window.irPagina = (page) => {
-            currentPage = page;
-            renderTabla();
-        };
-
-        // el filtro de búsqueda en tiempo real --Oscar.
+        window.irPagina = (page) => { currentPage = page; renderTabla(); };
         function filtrarProductores() {
             const busqueda = searchInput.value.toLowerCase().trim();
-            if (busqueda === '') {
-                filteredProductores = productoresDelMunicipio;
-            } else {
-                filteredProductores = productoresDelMunicipio.filter(prod =>
-                    prod.nombre.toLowerCase().includes(busqueda) ||
-                    prod.rancho.toLowerCase().includes(busqueda) ||
-                    (prod.telefono && prod.telefono.includes(busqueda))
-                );
-            }
-            currentPage = 1;
-            renderTabla();
+            filteredProductores = busqueda==='' ? productoresDelMunicipio : productoresDelMunicipio.filter(prod => prod.nombre.toLowerCase().includes(busqueda) || prod.rancho.toLowerCase().includes(busqueda) || (prod.telefono && prod.telefono.includes(busqueda)));
+            currentPage=1; renderTabla();
         }
-
         searchInput.addEventListener('input', filtrarProductores);
-
-        // Ahora si quedo la exportación a Excel. Se usp SheetJS. --- DIego
         function exportarExcel() {
-            const datosExcel = filteredProductores.map(prod => ({
-                'Nombre': prod.nombre,
-                'Rancho': prod.rancho,
-                'Municipio': prod.municipio,
-                'Localidad': prod.localidad,
-                'Teléfono': prod.telefono,
-                'Total Cabezas': calcularTotalCabezas(prod),
-                'Tenencia': prod.tenencia,
-                'Folio': prod.folio,
-                'Fecha Alta': prod.fecha_alta
-            }));
+            const datosExcel = filteredProductores.map(prod => ({'Nombre':prod.nombre,'Rancho':prod.rancho,'Municipio':prod.municipio,'Localidad':prod.localidad,'Teléfono':prod.telefono,'Total Cabezas':calcularTotalCabezas(prod),'Tenencia':prod.tenencia,'Folio':prod.folio,'Fecha Alta':prod.fecha_alta}));
             const ws = XLSX.utils.json_to_sheet(datosExcel);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Productores');
             XLSX.writeFile(wb, `productores_${municipioUsuario}.xlsx`);
         }
-
         exportBtn.addEventListener('click', exportarExcel);
-
-        // Ya conecté con la API para cargar los productores del municipio --- Diego.
         async function cargarProductores() {
-            try {
-                console.log('🔍 Llamando a obtenerProductores con:', municipioUsuario);
-                productoresDelMunicipio = await obtenerProductores(municipioUsuario);
-                console.log('✅ Productores obtenidos:', productoresDelMunicipio);
-                filtrarProductores();
-            } catch (error) {
-                console.error('❌ Error cargando productores:', error);
-                alert('No se pudieron cargar los productores. Verifica que el backend esté corriendo.\n' + error.message);
-            }
+            try { productoresDelMunicipio = await obtenerProductores(municipioUsuario); filtrarProductores(); } catch(error) { console.error(error); alert('No se pudieron cargar los productores. Verifica que el backend esté corriendo.\n'+error.message); }
         }
-
         cargarProductores();
     </script>
 </body>

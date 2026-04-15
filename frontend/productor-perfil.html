@@ -8,274 +8,139 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(145deg, #eef2f7, #d9e2ec);
-            padding: 30px;
-            margin: 0;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 30px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        h1 {
-            color: #1e4b3c;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .perfil-section {
-            margin-bottom: 30px;
-            border-bottom: 1px solid #e0e7ef;
-            padding-bottom: 20px;
-        }
-        .perfil-section h2 {
-            color: #2c7a4d;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-        .campo {
-            margin-bottom: 12px;
-        }
-        .campo strong {
-            display: inline-block;
-            width: 150px;
-            color: #2c3e50;
-        }
-        .grupo-ganado {
-            background: #f8fbfe;
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #e2f0ea;
-        }
-        .grupo-ganado h3 {
-            color: #1e4b3c;
-            margin-bottom: 15px;
-        }
-        .btn-pdf {
-            background: #1e4b3c;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 40px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-top: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .btn-pdf:hover {
-            background: #14382d;
-            transform: translateY(-2px);
-        }
-        .btn-volver {
-            background: #6c757d;
-            margin-left: 15px;
-        }
-        .btn-volver:hover {
-            background: #5a6268;
-        }
-        .btn-cerrar {
-            background: #dc3545;
-            margin-left: 15px;
-        }
-        .btn-cerrar:hover {
-            background: #c82333;
-        }
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.2rem;
-            color: #1e4b3c;
-        }
-        .button-group {
-            text-align: center;
-            margin-top: 20px;
-        }
-        @media (max-width: 700px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-            .container {
-                padding: 20px;
-            }
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(145deg, #eef2f7, #d9e2ec); padding: 30px; margin: 0; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; border-radius: 30px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); position: relative; }
+        h1 { color: #1e4b3c; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
+        .perfil-section { margin-bottom: 30px; border-bottom: 1px solid #e0e7ef; padding-bottom: 20px; }
+        .perfil-section h2 { color: #2c7a4d; margin-bottom: 20px; font-size: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+        .campo { margin-bottom: 12px; }
+        .campo strong { display: inline-block; width: 160px; color: #2c3e50; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 1px solid #cfe3db; padding-bottom: 10px; }
+        .tab-btn { background: #f0f5fa; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .tab-btn.active { background: #1e4b3c; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tabla-ganado { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .tabla-ganado th, .tabla-ganado td { border: 1px solid #d0e2d9; padding: 8px 12px; text-align: left; }
+        .tabla-ganado th { background: #e0ede7; color: #1e4b3c; }
+        .firmas-pdf { display: none; }
+        @media print { .firmas-pdf { display: block; margin-top: 40px; } }
+        .firma-linea { margin-top: 30px; display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+        .firma-item { flex: 1; text-align: center; }
+        .firma-item .linea { border-top: 1px solid #000; width: 100%; margin: 10px 0 5px; }
+        .btn-pdf { background: #1e4b3c; color: white; border: none; padding: 12px 30px; border-radius: 40px; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 20px; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-pdf:hover { background: #14382d; transform: translateY(-2px); }
+        .btn-cerrar { background: #dc3545; margin-left: 15px; }
+        .btn-cerrar:hover { background: #c82333; }
+        .button-group { text-align: center; margin-top: 20px; }
+        .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #1e4b3c; }
+        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container" id="perfil-content">
-        <div class="loading">
-            <i class="fas fa-spinner fa-spin"></i> Cargando datos del productor...
-        </div>
-    </div>
-
-    <script type="module">
-        import { obtenerProductor } from './api.js';
-
-        // Obtener el ID del productor (de la URL o de sessionStorage)
-        const urlParams = new URLSearchParams(window.location.search);
-        let productorId = urlParams.get('id');
-        
-        if (!productorId) {
-            productorId = sessionStorage.getItem('productorId');
-            if (!productorId) {
-                window.location.href = 'login-productor.html';
-                // No usar return aquí porque no estamos dentro de una función
-            }
+<div class="container" id="perfil-content"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando datos del productor...</div></div>
+<script type="module">
+    import { obtenerProductor } from './api.js';
+    const urlParams = new URLSearchParams(window.location.search);
+    let productorId = urlParams.get('id');
+    if (!productorId) { productorId = sessionStorage.getItem('productorId'); if (!productorId) window.location.href = 'login-productor.html'; }
+    if (productorId) cargarProductor(productorId);
+    async function cargarProductor(id) {
+        try {
+            const productor = await obtenerProductor(id);
+            mostrarPerfil(productor);
+            agregarBotonCerrarSesion();
+            document.getElementById('generarPDF').addEventListener('click', () => generarPDF(productor));
+        } catch (error) {
+            console.error(error);
+            document.getElementById('perfil-content').innerHTML = `<div style="text-align:center;padding:40px;"><i class="fas fa-exclamation-triangle" style="font-size:3rem;color:#b91c1c;"></i><h2>Productor no encontrado</h2><p>Error: ${error.message}</p><a href="ventanilla.html" class="btn-pdf" style="display:inline-block;margin-top:20px;">Volver a ventanilla</a></div>`;
         }
-
-        // Si tenemos ID, cargar el productor
-        if (productorId) {
-            cargarProductor(productorId);
-        }
-
-        async function cargarProductor(id) {
-            try {
-                const productor = await obtenerProductor(id);
-                
-                // Limpiar el loading y mostrar el perfil
-                mostrarPerfil(productor);
-                
-                // Agregar botón de cerrar sesión
-                agregarBotonCerrarSesion();
-                
-                // Agregar evento al botón de PDF (se crea en mostrarPerfil)
-                const pdfBtn = document.getElementById('generarPDF');
-                if (pdfBtn) {
-                    pdfBtn.addEventListener('click', () => generarPDF(productor));
+    }
+    function agregarBotonCerrarSesion() {
+        if (document.getElementById('cerrarSesionBtn')) return;
+        const buttonGroup = document.querySelector('.button-group') || (() => { const group = document.createElement('div'); group.className = 'button-group'; document.getElementById('perfil-content').appendChild(group); return group; })();
+        const cerrarBtn = document.createElement('button');
+        cerrarBtn.id = 'cerrarSesionBtn';
+        cerrarBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Cerrar sesión';
+        cerrarBtn.className = 'btn-pdf btn-cerrar';
+        cerrarBtn.onclick = () => { sessionStorage.removeItem('productorId'); sessionStorage.removeItem('productorUPP'); window.location.href = 'login-productor.html'; };
+        buttonGroup.appendChild(cerrarBtn);
+    }
+    function obtenerListaUPPs(productor) {
+        const upps = [productor.upp];
+        if (productor.upps_adicionales) { const adicionales = productor.upps_adicionales.split(',').map(u=>u.trim()).filter(u=>u); upps.push(...adicionales); }
+        return upps.filter(u=>u);
+    }
+    function mostrarPerfil(productor) {
+        const upps = obtenerListaUPPs(productor);
+        const totalCabezas = calcularTotalCabezas(productor);
+        let html = `<h1><i class="fas fa-user-check"></i> Perfil del Productor</h1>
+            <div class="perfil-section"><h2>📋 Datos Personales</h2><div class="grid-2">
+            <div class="campo"><strong>Nombre:</strong> ${productor.nombre||'N/A'}</div>
+            <div class="campo"><strong>Rancho:</strong> ${productor.rancho||'N/A'}</div>
+            <div class="campo"><strong>Municipio:</strong> ${productor.municipio||'N/A'}</div>
+            <div class="campo"><strong>Localidad:</strong> ${productor.localidad||'N/A'}</div>
+            <div class="campo"><strong>Teléfono:</strong> ${productor.telefono||'N/A'}</div>
+            <div class="campo"><strong>Folio:</strong> ${productor.folio||'N/A'}</div>
+            <div class="campo"><strong>Fecha de alta:</strong> ${productor.fecha_alta ? new Date(productor.fecha_alta).toLocaleDateString() : 'N/A'}</div>
+            <div class="campo"><strong>Tenencia:</strong> ${productor.tenencia||'N/A'}</div>
+            <div class="campo"><strong>Patente de Fierro:</strong> ${productor.patente||'N/A'}</div>
+            <div class="campo"><strong>Figura de Fierro:</strong> ${productor.figura_fierro||'N/A'}</div>
+            <div class="campo"><strong>Registro UMA:</strong> ${productor.uma||'N/A'}</div>
+            <div class="campo"><strong>Domicilio:</strong> ${productor.calle||''} ${productor.colonia?', Col. '+productor.colonia:''}</div>
+            </div></div>`;
+        if (upps.length > 0) {
+            html += `<div class="perfil-section"><h2>🐄 Inventario Ganadero (Total: ${totalCabezas} cabezas)</h2><div class="tabs" id="uppTabs">`;
+            upps.forEach((upp, idx) => { html += `<button class="tab-btn ${idx===0?'active':''}" data-upp="${upp}">${upp}</button>`; });
+            html += `</div>`;
+            upps.forEach((upp, idx) => {
+                const gruposFiltrados = productor.gruposGanado ? productor.gruposGanado.filter(g => g.upp_asociada === upp) : [];
+                html += `<div class="tab-content ${idx===0?'active':''}" data-upp-content="${upp}">`;
+                if (gruposFiltrados.length === 0) html += `<p>No hay ganado registrado para esta UPP.</p>`;
+                else {
+                    html += `<table class="tabla-ganado"><thead><tr><th>Especie</th><th>Raza</th><th>Cruza</th><th>Vientres</th><th>Crías</th><th>Sementales</th><th>Vaquillas</th><th>Novillos</th><th>Engorda</th><th>Otras</th><th>Arete</th></tr></thead><tbody>`;
+                    gruposFiltrados.forEach(g => {
+                        html += `<tr><td>${g.especie}</td><td>${g.raza||'N/A'}</td><td>${g.cruza?'Sí':'No'}</td><td>${g.vientres}</td><td>${g.crias}</td><td>${g.sementales}</td><td>${g.vaquillas}</td><td>${g.novillos}</td><td>${g.engorda}</td><td>${g.otras_cant>0?g.otras_cant+' ('+(g.otras_espec||'')+')':'0'}</td><td>${g.arete||'N/A'}</td></tr>`;
+                    });
+                    html += `</tbody></table>`;
                 }
-                
-            } catch (error) {
-                console.error('Error cargando productor:', error);
-                document.getElementById('perfil-content').innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #b91c1c;"></i>
-                        <h2>Productor no encontrado</h2>
-                        <p>El productor solicitado no existe o hubo un error en la conexión.</p>
-                        <a href="ventanilla.html" class="btn-pdf" style="display: inline-block; margin-top: 20px;">Volver a ventanilla</a>
-                    </div>
-                `;
-            }
+                html += `</div>`;
+            });
+            html += `</div>`;
+        } else {
+            html += `<div class="perfil-section"><h2>🐄 Inventario Ganadero</h2><p>No hay UPPs registradas.</p></div>`;
         }
-
-        function agregarBotonCerrarSesion() {
-            // Verificar si ya existe el botón para no duplicar
-            if (document.getElementById('cerrarSesionBtn')) return;
-            
-            const buttonGroup = document.querySelector('.button-group') || (() => {
-                const group = document.createElement('div');
-                group.className = 'button-group';
-                document.getElementById('perfil-content').appendChild(group);
-                return group;
-            })();
-            
-            const cerrarBtn = document.createElement('button');
-            cerrarBtn.id = 'cerrarSesionBtn';
-            cerrarBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Cerrar sesión';
-            cerrarBtn.className = 'btn-pdf btn-cerrar';
-            cerrarBtn.onclick = () => {
-                sessionStorage.removeItem('productorId');
-                sessionStorage.removeItem('productorUPP');
-                window.location.href = 'login-productor.html';
-            };
-            buttonGroup.appendChild(cerrarBtn);
-        }
-
-        function calcularTotalCabezas(productor) {
-            let total = 0;
-            if (productor.gruposGanado) {
-                productor.gruposGanado.forEach(grupo => {
-                    total += (parseInt(grupo.vientres) || 0) +
-                             (parseInt(grupo.crias) || 0) +
-                             (parseInt(grupo.sementales) || 0) +
-                             (parseInt(grupo.vaquillas) || 0) +
-                             (parseInt(grupo.novillos) || 0) +
-                             (parseInt(grupo.engorda) || 0) +
-                             (parseInt(grupo.otras_cant) || 0);
-                });
-            }
-            return total;
-        }
-
-        function mostrarPerfil(productor) {
-            const totalCabezas = calcularTotalCabezas(productor);
-            const html = `
-                <h1><i class="fas fa-user-check"></i> Perfil del Productor</h1>
-                
-                <div class="perfil-section">
-                    <h2>📋 Datos Personales</h2>
-                    <div class="grid-2">
-                        <div class="campo"><strong>Nombre:</strong> ${productor.nombre || 'N/A'}</div>
-                        <div class="campo"><strong>Rancho:</strong> ${productor.rancho || 'N/A'}</div>
-                        <div class="campo"><strong>Municipio:</strong> ${productor.municipio || 'N/A'}</div>
-                        <div class="campo"><strong>Localidad:</strong> ${productor.localidad || 'N/A'}</div>
-                        <div class="campo"><strong>Teléfono:</strong> ${productor.telefono || 'N/A'}</div>
-                        <div class="campo"><strong>Folio:</strong> ${productor.folio || 'N/A'}</div>
-                        <div class="campo"><strong>Fecha de alta:</strong> ${productor.fecha_alta ? new Date(productor.fecha_alta).toLocaleDateString() : 'N/A'}</div>
-                        <div class="campo"><strong>Tenencia:</strong> ${productor.tenencia || 'N/A'}</div>
-                        <div class="campo"><strong>Patente de Fierro:</strong> ${productor.patente || 'N/A'}</div>
-                        <div class="campo"><strong>UPP:</strong> ${productor.upp || 'N/A'}</div>
-                        <div class="campo"><strong>Registro UMA:</strong> ${productor.uma || 'N/A'}</div>
-                        <div class="campo"><strong>Domicilio:</strong> ${productor.calle || ''} ${productor.colonia ? ', Col. ' + productor.colonia : ''}</div>
-                    </div>
-                </div>
-                
-                <div class="perfil-section">
-                    <h2>🐄 Inventario Ganadero <span style="font-size: 1rem;">(Total: ${totalCabezas} cabezas)</span></h2>
-                    ${productor.gruposGanado && productor.gruposGanado.length ? productor.gruposGanado.map((grupo, idx) => `
-                        <div class="grupo-ganado">
-                            <h3>Grupo ${idx+1}: ${grupo.especie.toUpperCase()} - Raza: ${grupo.raza || 'No especificada'} ${grupo.cruza ? '(Cruza)' : ''}</h3>
-                            <div class="grid-2">
-                                <div><i class="fas fa-female"></i> Vientres: ${grupo.vientres}</div>
-                                <div><i class="fas fa-baby"></i> Crías: ${grupo.crias}</div>
-                                <div><i class="fas fa-male"></i> Sementales: ${grupo.sementales}</div>
-                                <div><i class="fas fa-female"></i> Vaquillas: ${grupo.vaquillas}</div>
-                                <div><i class="fas fa-horse"></i> Novillos: ${grupo.novillos}</div>
-                                <div><i class="fas fa-chart-line"></i> Engorda: ${grupo.engorda}</div>
-                                ${grupo.otras_cant > 0 ? `<div><i class="fas fa-paw"></i> Otras (${grupo.otras_espec}): ${grupo.otras_cant}</div>` : ''}
-                            </div>
-                        </div>
-                    `).join('') : '<p>No hay ganado registrado.</p>'}
-                </div>
-                
-                <div class="button-group">
-                    <button id="generarPDF" class="btn-pdf"><i class="fas fa-file-pdf"></i> Descargar constancia PDF</button>
-                    <a href="ventanilla.html" class="btn-pdf btn-volver"><i class="fas fa-arrow-left"></i> Volver a ventanilla</a>
-                </div>
-            `;
-            document.getElementById('perfil-content').innerHTML = html;
-        }
-
-        async function generarPDF(productor) {
-            const element = document.getElementById('perfil-content');
-            try {
-                const canvas = await html2canvas(element, { scale: 2 });
-                const imgData = canvas.toDataURL('image/png');
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 190;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-                pdf.save(`perfil_${(productor.nombre || 'productor').replace(/\s/g, '_')}.pdf`);
-            } catch (err) {
-                console.error('Error generando PDF:', err);
-                alert('Error al generar el PDF');
-            }
-        }
-    </script>
+        html += `<div class="button-group"><button id="generarPDF" class="btn-pdf"><i class="fas fa-file-pdf"></i> Descargar constancia PDF</button></div>
+            <div class="firmas-pdf"><div class="firma-linea"><div class="firma-item"><div class="linea"></div><div>${productor.nombre||'_________________'}</div><div>Productor</div></div><div class="firma-item"><div class="linea"></div><div>Representante de emisión de ${productor.localidad||'____________'}, ${productor.municipio||'____________'}</div><div>Responsable de emisión</div></div></div></div>`;
+        document.getElementById('perfil-content').innerHTML = html;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const upp = btn.dataset.upp;
+                document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+                document.querySelector(`.tab-content[data-upp-content="${upp}"]`).classList.add('active');
+            });
+        });
+    }
+    function calcularTotalCabezas(productor) {
+        if (!productor.gruposGanado) return 0;
+        return productor.gruposGanado.reduce((total,g) => total + (parseInt(g.vientres)||0)+(parseInt(g.crias)||0)+(parseInt(g.sementales)||0)+(parseInt(g.vaquillas)||0)+(parseInt(g.novillos)||0)+(parseInt(g.engorda)||0)+(parseInt(g.otras_cant)||0),0);
+    }
+    async function generarPDF(productor) {
+        const element = document.getElementById('perfil-content');
+        try {
+            const canvas = await html2canvas(element, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 190;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+            pdf.save(`perfil_${(productor.nombre || 'productor').replace(/\s/g, '_')}.pdf`);
+        } catch (err) { console.error(err); alert('Error al generar el PDF'); }
+    }
+</script>
 </body>
 </html>

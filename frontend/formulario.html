@@ -58,12 +58,7 @@
             <div class="grid-2">
                 <div class="form-group"><label><i class="fas fa-user"></i> Nombre completo <span class="required">*</span></label><input type="text" name="nombre" id="nombre" required></div>
                 <div class="form-group"><label><i class="fas fa-home"></i> Rancho <span class="required">*</span></label><input type="text" name="rancho" id="rancho" required></div>
-                <div class="form-group">
-                    <label><i class="fas fa-map-marker-alt"></i> Municipio <span class="required">*</span></label>
-                    <select name="municipio" id="municipio" required>
-                        <option value="">Cargando municipios...</option>
-                    </select>
-                </div>
+                <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Municipio <span class="required">*</span></label><select name="municipio" id="municipio" required><option value="">Cargando municipios...</option></select></div>
                 <div class="form-group"><label><i class="fas fa-location-dot"></i> Localidad / Paraje</label><input type="text" name="localidad" id="localidad"></div>
                 <div class="form-group"><label><i class="fas fa-file-contract"></i> Tenencia</label><select name="tenencia" id="tenencia"><option value="">Seleccione</option><option value="Ejidal">Ejidal</option><option value="Privada">Privada</option><option value="Comunal">Comunal</option><option value="Renta">Renta</option><option value="Otro">Otro</option></select></div>
                 <div class="form-group"><label><i class="fas fa-tag"></i> Patente de Fierro</label><input type="text" name="patente" id="patente"></div>
@@ -73,32 +68,25 @@
                 <div class="form-group"><label><i class="fas fa-map-pin"></i> Colonia</label><input type="text" name="colonia" id="colonia"></div>
                 <div class="form-group"><label><i class="fas fa-road"></i> Calle y número</label><input type="text" name="calle" id="calle"></div>
                 <div class="form-group"><label><i class="fas fa-layer-group"></i> UPP</label><input type="text" name="upp" id="upp"></div>
+                <div class="form-group"><label><i class="fas fa-layer-group"></i> UPPs adicionales (separadas por coma)</label><input type="text" name="upps_adicionales" id="uppsAdicionales" placeholder="Ej. UPP-002, UPP-003"></div>
+                <div class="form-group"><label><i class="fas fa-tag"></i> Figura de Fierro</label><input type="text" name="figura_fierro" id="figuraFierro" placeholder="Ej. Un sol, una estrella"></div>
                 <div class="form-group"><label><i class="fas fa-folder-open"></i> Folio</label><input type="text" name="folio" id="folio"></div>
                 <div class="form-group full-width"><label><i class="fas fa-pen"></i> Observaciones</label><textarea name="observaciones" id="observaciones" rows="3"></textarea></div>
             </div>
-
             <div class="section-title"><img class="vaca" src="imagenes/vaca.png" alt="logovaca" > Registro de ganado</div>
             <div id="grupos-ganado" class="livestock-section"></div>
             <button type="button" class="btn-add-group" id="agregarGrupoBtn"><i class="fas fa-plus-circle"></i> Agregar otro grupo de animales</button>
             <div class="global-total"><span>Total de cabezas:</span><span class="global-total-value" id="totalGlobal">0</span></div>
-            <div class="buttons">
-                <a href="ventanilla.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar registro</button>
-            </div>
+            <div class="buttons"><a href="ventanilla.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar registro</button></div>
         </form>
     </div>
-
     <script type="module">
         import { crearProductor, actualizarProductor, obtenerProductor } from './api.js';
-
         const urlParams = new URLSearchParams(window.location.search);
         const productorId = urlParams.get('productor');
         const accion = urlParams.get('accion');
-
         const contenedorGrupos = document.getElementById('grupos-ganado');
         const agregarBtn = document.getElementById('agregarGrupoBtn');
-
-        // Ya terminé la parte de carga de municipios y preselección según la ventanilla --- Diego
         const ventanillaUser = sessionStorage.getItem('ventanillaUser');
         async function cargarMunicipios() {
             try {
@@ -106,68 +94,30 @@
                 const municipios = await response.json();
                 const select = document.getElementById('municipio');
                 select.innerHTML = '<option value="">Seleccione un municipio</option>';
-                municipios.forEach(m => {
-                    const option = document.createElement('option');
-                    option.value = m;
-                    option.textContent = m;
-                    select.appendChild(option);
-                });
-                if (ventanillaUser) {
-                    const encontrado = municipios.find(m => m.toLowerCase() === ventanillaUser.toLowerCase());
-                    if (encontrado) {
-                        select.value = encontrado;
-                    } else {
-                        select.value = ventanillaUser;
-                    }
-                }
-            } catch (error) {
-                console.error('Error cargando municipios:', error);
-            }
+                municipios.forEach(m => { const option = document.createElement('option'); option.value = m; option.textContent = m; select.appendChild(option); });
+                if (ventanillaUser) { const encontrado = municipios.find(m => m.toLowerCase() === ventanillaUser.toLowerCase()); if (encontrado) select.value = encontrado; else select.value = ventanillaUser; }
+            } catch (error) { console.error('Error cargando municipios:', error); }
         }
         cargarMunicipios();
-
-        function actualizarSubtotal(grupoDiv) {
-            const cantidades = grupoDiv.querySelectorAll('.input-total');
-            let suma = 0;
-            cantidades.forEach(inp => suma += parseInt(inp.value) || 0);
-            grupoDiv.querySelector('.subtotal-value').textContent = suma;
-        }
-
-        function actualizarTotalGlobal() {
-            const grupos = document.querySelectorAll('.group-card');
-            let total = 0;
-            grupos.forEach(grupo => {
-                total += parseInt(grupo.querySelector('.subtotal-value')?.textContent) || 0;
-            });
-            document.getElementById('totalGlobal').textContent = total;
-        }
-
-        // Ya resolví el problema de los grupos de ganado que no se mostraban --- Diego
+        function actualizarSubtotal(grupoDiv) { const cantidades = grupoDiv.querySelectorAll('.input-total'); let suma = 0; cantidades.forEach(inp => suma += parseInt(inp.value) || 0); grupoDiv.querySelector('.subtotal-value').textContent = suma; }
+        function actualizarTotalGlobal() { const grupos = document.querySelectorAll('.group-card'); let total = 0; grupos.forEach(grupo => { total += parseInt(grupo.querySelector('.subtotal-value')?.textContent) || 0; }); document.getElementById('totalGlobal').textContent = total; }
         function crearGrupoDesdeDatos(grupo, index) {
-            const grupoDiv = document.createElement('div');
-            grupoDiv.className = 'group-card';
-            grupoDiv.dataset.grupoId = Date.now() + index;
-            grupoDiv.innerHTML = `
-                <div class="group-header">
-                    <div class="group-title"><i class="fas fa-${index === 0 ? 'cow' : 'dragon'}"></i> Grupo de animales ${index+1}</div>
-                    <button type="button" class="btn-remove-group" onclick="window.eliminarGrupo(this)"><i class="fas fa-trash"></i></button>
-                </div>
-                <div class="group-fields">
-                    <div class="field-small"><label>Especie</label><select name="especie" class="especie-select"><option value="bovino">Bovino</option><option value="ovino">Ovino</option><option value="caprino">Caprino</option><option value="porcino">Porcino</option><option value="equino">Equino</option></select></div>
-                    <div class="field-small"><label>Raza</label><input type="text" name="raza" class="raza-input"></div>
-                    <div class="field-small" style="display: flex; flex-direction: row; align-items: center;"><label style="display:flex; gap:5px;"><input type="checkbox" name="cruza" class="cruza-check"> ¿Cruza?</label></div>
-                    <div class="field-small"><label>Vientres</label><input type="number" name="vientres" min="0" value="0" class="cantidad input-total"></div>
-                    <div class="field-small"><label>Crías</label><input type="number" name="crias" min="0" value="0" class="cantidad input-total"></div>
-                    <div class="field-small"><label>Sementales</label><input type="number" name="sementales" min="0" value="0" class="cantidad input-total"></div>
-                    <div class="field-small"><label>Vaquillas</label><input type="number" name="vaquillas" min="0" value="0" class="cantidad input-total"></div>
-                    <div class="field-small"><label>Novillos</label><input type="number" name="novillos" min="0" value="0" class="cantidad input-total"></div>
-                    <div class="field-small"><label>Engorda</label><input type="number" name="engorda" min="0" value="0" class="cantidad input-total"></div>
-                    <div class="field-small"><label>Otras (cant.)</label><input type="number" name="otras_cant" min="0" value="0" class="cantidad input-total"></div>
-                    <div class="field-small" style="grid-column: span 2;"><label>Especificar otras</label><input type="text" name="otras_espec"></div>
-                </div>
-                <div class="subtotal"><span>Subtotal de este grupo:</span><span class="subtotal-value">0</span></div>
-            `;
-
+            const grupoDiv = document.createElement('div'); grupoDiv.className = 'group-card'; grupoDiv.dataset.grupoId = Date.now() + index;
+            grupoDiv.innerHTML = `<div class="group-header"><div class="group-title"><i class="fas fa-${index===0?'cow':'dragon'}"></i> Grupo de animales ${index+1}</div><button type="button" class="btn-remove-group" onclick="window.eliminarGrupo(this)"><i class="fas fa-trash"></i></button></div>
+            <div class="group-fields"><div class="field-small"><label>Especie</label><select name="especie" class="especie-select"><option value="bovino">Bovino</option><option value="ovino">Ovino</option><option value="caprino">Caprino</option><option value="porcino">Porcino</option><option value="equino">Equino</option></select></div>
+            <div class="field-small"><label>Raza</label><input type="text" name="raza" class="raza-input"></div>
+            <div class="field-small"><label style="display:flex; gap:5px;"><input type="checkbox" name="cruza" class="cruza-check"> ¿Cruza?</label></div>
+            <div class="field-small"><label>Vientres</label><input type="number" name="vientres" min="0" value="0" class="cantidad input-total"></div>
+            <div class="field-small"><label>Crías</label><input type="number" name="crias" min="0" value="0" class="cantidad input-total"></div>
+            <div class="field-small"><label>Sementales</label><input type="number" name="sementales" min="0" value="0" class="cantidad input-total"></div>
+            <div class="field-small"><label>Vaquillas</label><input type="number" name="vaquillas" min="0" value="0" class="cantidad input-total"></div>
+            <div class="field-small"><label>Novillos</label><input type="number" name="novillos" min="0" value="0" class="cantidad input-total"></div>
+            <div class="field-small"><label>Engorda</label><input type="number" name="engorda" min="0" value="0" class="cantidad input-total"></div>
+            <div class="field-small"><label>Otras (cant.)</label><input type="number" name="otras_cant" min="0" value="0" class="cantidad input-total"></div>
+            <div class="field-small"><label>Especificar otras</label><input type="text" name="otras_espec"></div>
+            <div class="field-small"><label>UPP asociada</label><input type="text" name="upp_asociada" class="upp-asociada" placeholder="UPP a la que pertenece"></div>
+            <div class="field-small"><label>Número de arete</label><input type="text" name="arete" class="arete-input" placeholder="Ej. A-1234"></div></div>
+            <div class="subtotal"><span>Subtotal de este grupo:</span><span class="subtotal-value">0</span></div>`;
             grupoDiv.querySelector('.especie-select').value = grupo.especie;
             grupoDiv.querySelector('.raza-input').value = grupo.raza || '';
             if (grupo.cruza) grupoDiv.querySelector('.cruza-check').checked = true;
@@ -179,38 +129,15 @@
             grupoDiv.querySelector('[name="engorda"]').value = grupo.engorda;
             grupoDiv.querySelector('[name="otras_cant"]').value = grupo.otras_cant;
             grupoDiv.querySelector('[name="otras_espec"]').value = grupo.otras_espec || '';
-
+            grupoDiv.querySelector('.upp-asociada').value = grupo.upp_asociada || '';
+            grupoDiv.querySelector('.arete-input').value = grupo.arete || '';
             const inputs = grupoDiv.querySelectorAll('.input-total');
-            inputs.forEach(inp => {
-                inp.addEventListener('input', () => {
-                    actualizarSubtotal(grupoDiv);
-                    actualizarTotalGlobal();
-                });
-            });
+            inputs.forEach(inp => { inp.addEventListener('input', () => { actualizarSubtotal(grupoDiv); actualizarTotalGlobal(); }); });
             actualizarSubtotal(grupoDiv);
             return grupoDiv;
         }
-
-        function crearGrupo(index) {
-            return crearGrupoDesdeDatos({
-                especie: 'bovino', raza: '', cruza: false,
-                vientres: 0, crias: 0, sementales: 0, vaquillas: 0, novillos: 0, engorda: 0, otras_cant: 0, otras_espec: ''
-            }, index);
-        }
-
-        window.eliminarGrupo = function(btn) {
-            const grupo = btn.closest('.group-card');
-            if (grupo && confirm('¿Eliminar este grupo?')) {
-                grupo.remove();
-                actualizarTotalGlobal();
-                const grupos = document.querySelectorAll('.group-card');
-                grupos.forEach((g, idx) => {
-                    const titulo = g.querySelector('.group-title');
-                    if (titulo) titulo.innerHTML = `<i class="fas fa-${idx === 0 ? 'cow' : 'dragon'}"></i> Grupo de animales ${idx+1}`;
-                });
-            }
-        };
-
+        function crearGrupo(index) { return crearGrupoDesdeDatos({ especie:'bovino', raza:'', cruza:false, vientres:0, crias:0, sementales:0, vaquillas:0, novillos:0, engorda:0, otras_cant:0, otras_espec:'' }, index); }
+        window.eliminarGrupo = function(btn) { const grupo = btn.closest('.group-card'); if (grupo && confirm('¿Eliminar este grupo?')) { grupo.remove(); actualizarTotalGlobal(); const grupos = document.querySelectorAll('.group-card'); grupos.forEach((g,idx) => { const titulo = g.querySelector('.group-title'); if (titulo) titulo.innerHTML = `<i class="fas fa-${idx===0?'cow':'dragon'}"></i> Grupo de animales ${idx+1}`; }); } };
         async function cargarProductorParaEdicion(id) {
             try {
                 const productor = await obtenerProductor(id);
@@ -226,25 +153,17 @@
                 document.getElementById('colonia').value = productor.colonia || '';
                 document.getElementById('calle').value = productor.calle || '';
                 document.getElementById('upp').value = productor.upp || '';
+                document.getElementById('uppsAdicionales').value = productor.upps_adicionales || '';
+                document.getElementById('figuraFierro').value = productor.figura_fierro || '';
                 document.getElementById('folio').value = productor.folio || '';
                 document.getElementById('observaciones').value = productor.observaciones || '';
                 if (productor.gruposGanado && productor.gruposGanado.length) {
                     contenedorGrupos.innerHTML = '';
-                    productor.gruposGanado.forEach((grupo, idx) => {
-                        const grupoDiv = crearGrupoDesdeDatos(grupo, idx);
-                        contenedorGrupos.appendChild(grupoDiv);
-                    });
+                    productor.gruposGanado.forEach((grupo, idx) => { contenedorGrupos.appendChild(crearGrupoDesdeDatos(grupo, idx)); });
                     actualizarTotalGlobal();
-                } else {
-                    const grupoDiv = crearGrupo(0);
-                    contenedorGrupos.appendChild(grupoDiv);
-                }
-            } catch (error) {
-                console.error('Error cargando productor:', error);
-                alert('No se pudo cargar el productor para editar');
-            }
+                } else { contenedorGrupos.appendChild(crearGrupo(0)); }
+            } catch (error) { console.error(error); alert('No se pudo cargar el productor para editar'); }
         }
-
         function obtenerDatosFormulario() {
             const productor = {
                 nombre: document.getElementById('nombre').value,
@@ -259,12 +178,13 @@
                 colonia: document.getElementById('colonia').value,
                 calle: document.getElementById('calle').value,
                 upp: document.getElementById('upp').value,
+                upps_adicionales: document.getElementById('uppsAdicionales').value,
+                figura_fierro: document.getElementById('figuraFierro').value,
                 folio: document.getElementById('folio').value,
                 observaciones: document.getElementById('observaciones').value
             };
             const gruposGanado = [];
-            const gruposDom = document.querySelectorAll('.group-card');
-            gruposDom.forEach(grupo => {
+            document.querySelectorAll('.group-card').forEach(grupo => {
                 gruposGanado.push({
                     especie: grupo.querySelector('.especie-select').value,
                     raza: grupo.querySelector('.raza-input').value,
@@ -276,114 +196,56 @@
                     novillos: parseInt(grupo.querySelector('[name="novillos"]').value) || 0,
                     engorda: parseInt(grupo.querySelector('[name="engorda"]').value) || 0,
                     otras_cant: parseInt(grupo.querySelector('[name="otras_cant"]').value) || 0,
-                    otras_espec: grupo.querySelector('[name="otras_espec"]').value
+                    otras_espec: grupo.querySelector('[name="otras_espec"]').value,
+                    upp_asociada: grupo.querySelector('.upp-asociada').value,
+                    arete: grupo.querySelector('.arete-input').value
                 });
             });
             return { productor, gruposGanado };
         }
-
-        agregarBtn.addEventListener('click', () => {
-            const nuevo = crearGrupo(contenedorGrupos.children.length);
-            contenedorGrupos.appendChild(nuevo);
-            actualizarTotalGlobal();
-        });
-
+        agregarBtn.addEventListener('click', () => { const nuevo = crearGrupo(contenedorGrupos.children.length); contenedorGrupos.appendChild(nuevo); actualizarTotalGlobal(); });
         document.getElementById('registroForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const { productor, gruposGanado } = obtenerDatosFormulario();
-            if (!productor.nombre || !productor.rancho || !productor.municipio || !productor.telefono) {
-                alert('Complete los campos obligatorios: nombre, rancho, municipio, teléfono. Fecha de Alta');
-                return;
-            }
-            if (gruposGanado.length === 0) {
-                alert('Debe agregar al menos un grupo de ganado.');
-                return;
-            }
-                        // Validación previa de crías vs vientres
-            const gruposDom = document.querySelectorAll('.group-card');
+            if (!productor.nombre || !productor.rancho || !productor.municipio || !productor.telefono) { alert('Complete los campos obligatorios: nombre, rancho, municipio, teléfono.'); return; }
+            if (gruposGanado.length === 0) { alert('Debe agregar al menos un grupo de ganado.'); return; }
             let errorGrupos = false;
-            gruposDom.forEach((grupo, idx) => {
+            document.querySelectorAll('.group-card').forEach((grupo, idx) => {
                 const crias = parseInt(grupo.querySelector('[name="crias"]').value) || 0;
                 const vientres = parseInt(grupo.querySelector('[name="vientres"]').value) || 0;
-                if (crias > vientres) {
-                    alert(`En el grupo ${idx+1}, las crías (${crias}) no pueden ser mayores que los vientres (${vientres}).`);
-                    errorGrupos = true;
-                }
+                if (crias > vientres) { alert(`En el grupo ${idx+1}, las crías (${crias}) no pueden ser mayores que los vientres (${vientres}).`); errorGrupos = true; }
             });
             if (errorGrupos) return;
             try {
-                if (productorId && accion === 'editar') {
-                    await actualizarProductor(productorId, productor, gruposGanado);
-                    alert('Productor actualizado correctamente.');
-                } else {
-                    const res = await crearProductor(productor, gruposGanado);
-                    alert('Productor creado con ID: ' + res.id);
-                }
+                if (productorId && accion === 'editar') { await actualizarProductor(productorId, productor, gruposGanado); alert('Productor actualizado correctamente.'); }
+                else { const res = await crearProductor(productor, gruposGanado); alert('Productor creado con ID: ' + res.id); }
                 window.location.href = 'ventanilla.html';
             } catch (error) {
-                console.error(error);
-              let mensaje = 'Error al guardar: ';
-            if (error.message) {
-                try {
-                    const errorData = JSON.parse(error.message);
-                    if (errorData.detalles) {
-                        mensaje += '\n' + errorData.detalles.join('\n');
-                    } else {
-                        mensaje += errorData.error || error.message;
-                    }
-                } catch (e) {
-                    mensaje += error.message;
-                }
-            } else {
-                mensaje += error;
-            }
-            alert(mensaje);
+                let mensaje = 'Error al guardar: ';
+                if (error.message) { try { const errorData = JSON.parse(error.message); if (errorData.detalles) mensaje += '\n' + errorData.detalles.join('\n'); else mensaje += errorData.error || error.message; } catch(e) { mensaje += error.message; } }
+                else mensaje += error;
+                alert(mensaje);
             }
         });
-
-        // Ya terminé la parte para que se generara el folio automático --- Oscar
         function generarFolio() {
             const nombre = document.getElementById('nombre').value.trim();
             const rancho = document.getElementById('rancho').value.trim();
             const municipio = document.getElementById('municipio').value;
             if (!nombre || !rancho || !municipio) return;
-
-            let nombrePart = nombre.replace(/[áéíóúü]/g, function(match) {
-                const acentos = {á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
-                return acentos[match] || match;
-            }).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
-            if (nombrePart.length < 2) nombrePart = nombrePart.padEnd(2, 'X');
-
-            let ranchoPart = rancho.replace(/[áéíóúü]/g, function(match) {
-                const acentos = {á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
-                return acentos[match] || match;
-            }).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
-            if (ranchoPart.length < 2) ranchoPart = ranchoPart.padEnd(2, 'X');
-
-            let muniPart = municipio.replace(/[áéíóúü]/g, function(match) {
-                const acentos = {á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'};
-                return acentos[match] || match;
-            }).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
-            if (muniPart.length < 2) muniPart = muniPart.padEnd(2, 'X');
-
+            let nombrePart = nombre.replace(/[áéíóúü]/g, m => ({á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'}[m]||m)).toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+            if (nombrePart.length<2) nombrePart = nombrePart.padEnd(2,'X');
+            let ranchoPart = rancho.replace(/[áéíóúü]/g, m => ({á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'}[m]||m)).toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+            if (ranchoPart.length<2) ranchoPart = ranchoPart.padEnd(2,'X');
+            let muniPart = municipio.replace(/[áéíóúü]/g, m => ({á:'a',é:'e',í:'i',ó:'o',ú:'u',ü:'u'}[m]||m)).toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+            if (muniPart.length<2) muniPart = muniPart.padEnd(2,'X');
             const numero = Math.floor(Math.random() * 9000 + 1000);
-            const folio = `${muniPart}-${nombrePart}-${ranchoPart}-${numero}`;
-            document.getElementById('folio').value = folio;
+            document.getElementById('folio').value = `${muniPart}-${nombrePart}-${ranchoPart}-${numero}`;
         }
-
         document.getElementById('nombre').addEventListener('input', generarFolio);
         document.getElementById('rancho').addEventListener('input', generarFolio);
         document.getElementById('municipio').addEventListener('change', generarFolio);
-
-        if (productorId && accion === 'editar') {
-            cargarProductorParaEdicion(productorId);
-        } else {
-            const grupoVacio = crearGrupo(0);
-            contenedorGrupos.appendChild(grupoVacio);
-            actualizarTotalGlobal();
-            document.getElementById('fechaAlta').value = new Date().toISOString().split('T')[0];
-            generarFolio();
-        }
+        if (productorId && accion === 'editar') { cargarProductorParaEdicion(productorId); }
+        else { const grupoVacio = crearGrupo(0); contenedorGrupos.appendChild(grupoVacio); actualizarTotalGlobal(); document.getElementById('fechaAlta').value = new Date().toISOString().split('T')[0]; generarFolio(); }
     </script>
 </body>
 </html>
